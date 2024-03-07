@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "test-6f72e",
+    "staging": "test-6f72e"
+  },
+  "targets": {},
+  "etags": {}
+}

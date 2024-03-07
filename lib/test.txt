@@ -1,0 +1,302 @@
+//오전 6시 일일 컨텐츠 초기화
+  // showResetDayContentsDialog(BuildContext context) async {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => ChangeNotifierProvider.value(
+  //       value: this,
+  //       child: Dialog(
+  //         child: ConfirmDialog(
+  //           text: '일일 컨텐츠를 초기화하시겠습니까?',
+  //           confirmText: '초기화',
+  //           cancelText: '취소',
+  //         ),
+  //       ),
+  //     ),
+  //   ).then((value) async {
+  //     //초기화 버튼 누른 경우
+  //     if (value == true) {
+  //       context.read<CommonProvider>().onLoad();
+  //       await resetDayContents(context);
+  //       context.read<CommonProvider>().offLoad();
+  //     }
+  //   });
+  // }
+
+  // resetDayContents(BuildContext context) async {
+  //   var usedCount;
+  //   var gauge;
+  //   //restGauge 추가
+  //   //currentCount 초기화
+  //   await context
+  //       .read<CommonProvider>()
+  //       .userDB
+  //       .collection('characters')
+  //       .get()
+  //       .then((value) async {
+  //     for (var character in value.docs) {
+  //       final contents =
+  //           await character.reference.collection('dayContents').get();
+
+  //       for (var content in contents.docs) {
+  //         usedCount = content['maxCount'] -
+  //             (content['maxCount'] - content['currentCount']);
+  //         //0인 경우 -> max * 10 추가
+  //         //n인 경우 -> max - current * 10추가
+  //         gauge = content['currentRestGauge'] + (usedCount * 10);
+
+  //         //휴식 게이지 최대 100
+  //         if (gauge > 100) {
+  //           gauge = 100;
+  //         }
+
+  //         await content.reference.update({
+  //           'currentCount': content['maxCount'],
+  //           'currentRestGauge': gauge,
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
+
+  // showResetWeekContentsDialog(BuildContext context) async {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => ChangeNotifierProvider.value(
+  //       value: this,
+  //       child: Dialog(
+  //         child: ConfirmDialog(
+  //           text: '주간 컨텐츠를 초기화하시겠습니까?',
+  //           confirmText: '초기화',
+  //           cancelText: '취소',
+  //         ),
+  //       ),
+  //     ),
+  //   ).then((value) async {
+  //     //초기화 버튼 누른 경우
+  //     if (value == true) {
+  //       context.read<CommonProvider>().onLoad();
+  //       await resetWeekContents(context);
+  //       context.read<CommonProvider>().offLoad();
+  //     }
+  //   });
+  // }
+
+  // resetWeekContents(BuildContext context) async {
+  //   await context
+  //       .read<CommonProvider>()
+  //       .userDB
+  //       .collection('characters')
+  //       .get()
+  //       .then((value) async {
+  //     for (var character in value.docs) {
+  //       final contents =
+  //           await character.reference.collection('weekContents').get();
+
+  //       for (var content in contents.docs) {
+  //         await content.reference.update({
+  //           'clearedStage': 0,
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
+
+  //일일 컨텐츠 1회 완료
+  // completeDayContent(
+  //     {required BuildContext context,
+  //     required DayContentModel dayContentModel,
+  //     required characterName}) async {
+  //   final characterDB = await context.read<CommonProvider>().characterDB;
+
+  //   final content = (await characterDB
+  //       .collection('dayContents')
+  //       .where('contentName', isEqualTo: dayContentModel.contentName)
+  //       .get());
+
+  //   final doc = content.docs.first;
+
+  //   //횟수 소진
+  //   if (doc['currentCount'] == 0) {
+  //     return;
+  //   }
+
+  //   await content.docs.first.reference.update({
+  //     'currentCount': doc['currentCount'] - 1,
+  //     'currentRestGauge': doc['currentRestGauge'] >= 20
+  //         //휴식 게이지가 20 이상인 경우
+  //         ? doc['currentRestGauge'] - 20
+  //         //휴식 게이지가 20 미만인 경우
+  //         : doc['currentRestGauge'],
+  //   });
+  // }
+
+  //일일 컨텐츠 추가, 수정 다이얼로그
+  // showEditDayContentDialog(BuildContext context,
+  //     {required String characterName,
+  //     required int mode,
+  //     DayContentModel? dayContentModel}) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => ChangeNotifierProvider.value(
+  //       value: this,
+  //       child: Dialog(
+  //           child: EditDayContentDialog(
+  //         characterName: characterName,
+  //         mode: mode,
+  //         dayContentModel: dayContentModel,
+  //       )),
+  //     ),
+  //   ).then((value) async {
+  //     if (value == null) {
+  //       //getCharacterDayContents(context, characterModel.characterName);
+  //     }
+
+  //     if (value['result'] == true) {
+  //       //컨텐츠 추가, 수정
+  //       await editDayContent(
+  //           context: context,
+  //           characterName: characterName,
+  //           mode: value['mode'],
+  //           dayContentModel: value['content']);
+  //     }
+
+  //     currentCountTextEditingController.clear();
+  //     restGaugeTextEditingController.clear();
+  //   });
+  // }
+
+  //일일 컨텐츠 추가, 수정
+  // editDayContent(
+  //     {required BuildContext context,
+  //     required String characterName,
+  //     required int mode,
+  //     required DayContentModel dayContentModel}) async {
+  //   var data;
+
+  //   final characterDB = context.read<CommonProvider>().characterDB;
+
+  //   final dayContent = characterDB
+  //       .collection('dayContents')
+  //       .where('contentName', isEqualTo: dayContentModel.contentName);
+
+  //   //일일 컨텐츠 생성
+  //   if (mode == 0) {
+  //     data = {
+  //       'contentName': dayContentModel.contentName,
+  //       'maxCount': dayContentModel.maxCount,
+  //       'currentCount': int.parse(currentCountTextEditingController.text),
+  //       'maxRestGauge': dayContentModel.maxRestGauge,
+  //       'currentRestGauge': restGaugeTextEditingController.text.isEmpty
+  //           ? 0
+  //           : int.parse(restGaugeTextEditingController.text),
+  //       'priority': dayContentModel.priority,
+  //     };
+
+  //     //이미 존재하는 컨텐츠라면
+  //     if ((await dayContent.get()).docs.isEmpty == true) {
+  //       await characterDB.collection('dayContents').add(data);
+  //     } else {
+  //       debugPrint('중복된 컨텐츠');
+  //     }
+  //   }
+
+  //   //일일 컨텐츠 수정
+  //   else {
+  //     final currentRestGauge = restGaugeTextEditingController.text.isEmpty
+  //         ? 0
+  //         : int.parse(restGaugeTextEditingController.text);
+
+  //     (await dayContent.get()).docs.first.reference.update({
+  //       'currentCount': int.parse(currentCountTextEditingController.text),
+  //       'currentRestGauge': currentRestGauge,
+  //     });
+  //   }
+  // }
+
+  //주간 컨텐츠 1회 완료
+  // completeWeekContent(
+  //     {required BuildContext context,
+  //     required WeekContentModel weekContentModel,
+  //     required characterName}) async {
+  //   final character = await context
+  //       .read<CommonProvider>()
+  //       .userDB
+  //       .collection('characters')
+  //       .where('characterName', isEqualTo: characterName)
+  //       .get();
+
+  //   final content = await character.docs[0].reference
+  //       .collection('weekContents')
+  //       .where('contentName', isEqualTo: weekContentModel.contentName)
+  //       .get();
+
+  //   final doc = content.docs.first;
+
+  //   //전 스테이지 클리어
+  //   if (doc['clearedStage'] == doc['maxStage']) {
+  //     return;
+  //   }
+
+  //   await content.docs.first.reference.update({
+  //     'clearedStage': doc['clearedStage'] + 1,
+  //   });
+  // }
+
+  //수요일 6시 주간 컨텐츠 초기화 다이얼로그
+  // showResetWeekContentDialog(BuildContext context) async {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => ChangeNotifierProvider.value(
+  //       value: this,
+  //       child: Dialog(
+  //         child: ConfirmDialog(
+  //           text: '주간 컨텐츠를 초기화하시겠습니까?',
+  //           confirmText: '초기화',
+  //           cancelText: '취소',
+  //         ),
+  //       ),
+  //     ),
+  //   ).then((value) async {
+  //     //초기화 버튼 누른 경우
+  //     if (value == true) {
+  //       isLoading = true;
+  //       notifyListeners();
+  //       await resetWeekContent(context);
+  //       isLoading = false;
+  //       notifyListeners();
+  //     }
+  //   });
+  // }
+
+  //수요일 6시 주간 컨텐츠 초기화
+  // resetWeekContent(BuildContext context) async {
+  //   //restGauge 추가
+  //   //currentCount 초기화
+  //   await context
+  //       .read<CommonProvider>()
+  //       .userDB
+  //       .collection('characters')
+  //       .get()
+  //       .then((value) async {
+  //     for (var character in value.docs) {
+  //       final contents =
+  //           await character.reference.collection('weekContents').get();
+
+  //       for (var content in contents.docs) {
+  //         //0인 경우 -> max * 10 추가
+  //         //n인 경우 -> max - current * 10추가
+
+  //         await content.reference.update({'clearedStage': 0});
+  //       }
+  //     }
+  //   });
+  // }
+
+  //주간 컨텐츠 삭제
+  // deleteWeekContent(BuildContext context) async {
+  //   await context
+  //       .read<CommonProvider>()
+  //       .characterDB
+  //       .collection('weekContents')
+  //       .get();
+  // }
