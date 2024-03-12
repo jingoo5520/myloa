@@ -166,12 +166,18 @@ class _EditContentPageState extends State<EditContentPage> {
                                                               EditContentProvider>()
                                                           .currentCountTextEditingController
                                                           .text),
-                                                      currentRestGauge:
-                                                          int.parse(context
+                                                      currentRestGauge: context
+                                                                  .read<
+                                                                      EditContentProvider>()
+                                                                  .currentRestGaugeTextEditingController
+                                                                  .text !=
+                                                              ''
+                                                          ? int.parse(context
                                                               .read<
                                                                   EditContentProvider>()
                                                               .currentRestGaugeTextEditingController
-                                                              .text));
+                                                              .text)
+                                                          : 0);
 
                                               await context
                                                   .read<EditContentProvider>()

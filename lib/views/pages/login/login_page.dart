@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_template/providers/login/login_provider.dart';
-import 'package:flutter_template/resources/constants/constants.dart';
 import 'package:flutter_template/resources/constants/theme.dart';
 import 'package:flutter_template/views/widgets/common/custom_appbar.dart';
-import 'package:flutter_template/views/widgets/home/home_appbar.dart';
 import 'package:flutter_template/views/widgets/common/email_field.dart';
 import 'package:flutter_template/views/widgets/common/password_field.dart';
 import 'package:flutter_template/views/widgets/login/sign_in_button.dart';

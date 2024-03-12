@@ -122,7 +122,7 @@ class _CharacterCardState extends State<CharacterCard> {
                       ),
                     );
                   default:
-                    return SizedBox();
+                    return const SizedBox();
                 }
               }),
             ],

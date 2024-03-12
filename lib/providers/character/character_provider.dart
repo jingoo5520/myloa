@@ -14,15 +14,16 @@ import 'package:provider/provider.dart';
 
 class CharacterProvider extends ChangeNotifier {
   CharacterCardModel characterCardModel;
-  List<ContentModel> dayContentList = [];
-  List<ContentModel> weekContentList = [];
-  List<ContentModel> tempList = []; //삭제용 dayContent 리스트
+  List<ContentModel>? dayContentList;
+  List<ContentModel>? weekContentList;
+  List<ContentModel>? tempList; //삭제용 dayContent 리스트
+  List<bool> temporaryDeleteState = [];
+
+  //일반, 삭제모드
   int mode = 0;
 
   //일일, 주간 탭
   int tab = 0;
-  bool isLoading = false;
-  bool isFirstTime = true;
 
   List<String> tabNames = ['일일', '주간'];
 
@@ -49,11 +50,10 @@ class CharacterProvider extends ChangeNotifier {
 
   CharacterProvider(BuildContext context, {required this.characterCardModel}) {
     debugPrint('character');
-
-    pageSet(context);
+    setPage(context);
   }
 
-  pageSet(BuildContext context) async {
+  setPage(BuildContext context) async {
     await context
         .read<CommonProvider>()
         .selectCharacterDB(characterCardModel.characterModel.characterName);
@@ -72,10 +72,9 @@ class CharacterProvider extends ChangeNotifier {
   //모드 변경
   changeMode(int mode) {
     this.mode = mode;
+    List<bool> temp = List.filled(dayContentList!.length, false);
 
-    if (mode != 0) {
-      tempList = List.from(dayContentList);
-    }
+    temporaryDeleteState = temp;
 
     notifyListeners();
   }
@@ -112,7 +111,7 @@ class CharacterProvider extends ChangeNotifier {
   updateContents(ContentModel model) async {
     List<ContentModel> tempList;
 
-    tempList = dayContentList.map((dayContent) {
+    tempList = dayContentList!.map((dayContent) {
       if (dayContent.contentName == model.contentName) {
         // 해당 모델의 이름이 일치하면 copyWith를 사용하여 정보 변경
         return dayContent.copyWith(
@@ -169,6 +168,7 @@ class CharacterProvider extends ChangeNotifier {
     bool? result = await showModalBottomSheet(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.w)),
+        //모서리 둥글게
         clipBehavior: Clip.antiAliasWithSaveLayer,
         context: context,
         builder: (context) => ChangeNotifierProvider.value(
@@ -200,8 +200,7 @@ class CharacterProvider extends ChangeNotifier {
     if (result == true) {
       //삭제 모드
       if (mode == 1) {
-        Navigator.of(context).pop();
-        changeMode(mode);
+        changeMode(1);
       }
       //추가, 수정 모드
       else {
@@ -217,6 +216,21 @@ class CharacterProvider extends ChangeNotifier {
         });
       }
     }
+  }
+
+  //컨텐츠 임시 삭제
+  temporaryDeleteContent(int index) {
+    List<bool> temp = List.from(temporaryDeleteState);
+
+    temp[index] = true;
+    // temporaryDeleteState[index] = true;
+    // tempList!.removeAt(index);
+    //print(dayContentList!.length);
+    //print(tempList!.length);
+
+    temporaryDeleteState = temp;
+
+    notifyListeners();
   }
 
   //캐릭터 주간 컨텐츠 불러오기

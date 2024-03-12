@@ -7,10 +7,12 @@ import 'package:flutter_template/views/widgets/common/edit_bottom_sheet/edit_but
 import 'package:provider/provider.dart';
 
 class DayContentsBoard extends StatelessWidget {
+  final int mode;
   final String characterName;
-  List<ContentModel> dayContentList;
+  final List<ContentModel> dayContentList;
 
-  DayContentsBoard({
+  const DayContentsBoard({
+    required this.mode,
     required this.characterName,
     required this.dayContentList,
     super.key,
@@ -18,10 +20,12 @@ class DayContentsBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: SingleChildScrollView(
-        child: Column(children: [
+    return Selector<CharacterProvider, List<bool>>(
+      selector: (p0, p1) => p1.temporaryDeleteState,
+      builder: (context, value, child) => Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: SingleChildScrollView(
+            child: Column(children: [
           SizedBox(height: 24.h),
           Column(
             children: List.generate(dayContentList.length, (index) {
@@ -29,19 +33,23 @@ class DayContentsBoard extends StatelessWidget {
                   margin: EdgeInsets.only(
                       bottom: index != dayContentList.length - 1 ? 16.h : 0),
                   child: DayContentCard(
-                      mode: 0,
+                      isVisible: value.isEmpty ? true : !value[index],
+                      index: index,
+                      mode: mode,
                       characterName: characterName,
                       dayContentModel: dayContentList[index]));
             }),
           ),
-          EditButton(
-              margin: 16.h,
-              onTap: () {
-                context
-                    .read<CharacterProvider>()
-                    .showEditDayContentsBottomSheet(context);
-              })
-        ]),
+          mode == 0
+              ? EditButton(
+                  margin: 16.h,
+                  onTap: () {
+                    context
+                        .read<CharacterProvider>()
+                        .showEditDayContentsBottomSheet(context);
+                  })
+              : const SizedBox(),
+        ])),
       ),
     );
   }

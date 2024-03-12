@@ -11,11 +11,15 @@ class DayContentCard extends StatefulWidget {
   final ContentModel dayContentModel;
   final String characterName;
   final int mode;
+  final int index;
+  final bool isVisible;
 
   const DayContentCard({
+    required this.isVisible,
     required this.dayContentModel,
     required this.characterName,
     required this.mode,
+    required this.index,
     super.key,
   });
 
@@ -29,7 +33,6 @@ class _DayContentCardState extends State<DayContentCard> {
   @override
   void initState() {
     dayContentModel = widget.dayContentModel;
-
     super.initState();
   }
 
@@ -69,110 +72,129 @@ class _DayContentCardState extends State<DayContentCard> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 70.h,
-      child: Row(
-        children: [
-          Container(
-              width: 70.w,
-              height: 70.w,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.w),
-                color: Colors.black.withOpacity(0.3),
-              ),
-              child: Center(
-                child: Image.asset(
-                  'assets/${widget.dayContentModel.icon}.png',
-                  width: 48.w,
-                  height: 48.w,
+    return Visibility(
+      visible: widget.isVisible,
+      child: SizedBox(
+        height: 70.h,
+        child: Row(
+          children: [
+            Container(
+                width: 70.w,
+                height: 70.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.w),
+                  color: Colors.black.withOpacity(0.3),
                 ),
-              )),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            widget.dayContentModel.contentName,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          GestureDetector(
-                            onTap: () async {
-                              await Navigator.of(context)
-                                  .pushNamed(AppRoutes.editContent, arguments: {
-                                'type': 0,
-                                'mode': 1,
-                                'contentModel': dayContentModel
-                              }).then((value) {
-                                ContentModel contentModel =
-                                    value as ContentModel;
-
-                                // 수정필요
-                                setContent(mode: 1, contentModel: contentModel);
-                              });
-                            },
-                            child: Image.asset(
-                              'assets/icons/edit_pencil.png',
-                              width: 16.w,
-                              height: 16.w,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                          '${dayContentModel.currentCount}/${widget.dayContentModel.maxCount}',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            color: Colors.white,
-                          ))
-                    ],
+                child: Center(
+                  child: Image.asset(
+                    'assets/${widget.dayContentModel.icon}.png',
+                    width: 48.w,
+                    height: 48.w,
                   ),
-                  if (widget.dayContentModel.maxRestGauge != 0)
-                    RestGaugeBox(gauge: dayContentModel.currentRestGauge! / 20)
-                ],
+                )),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              widget.dayContentModel.contentName,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            GestureDetector(
+                              onTap: () async {
+                                await Navigator.of(context).pushNamed(
+                                    AppRoutes.editContent,
+                                    arguments: {
+                                      'type': 0,
+                                      'mode': 1,
+                                      'contentModel': dayContentModel
+                                    }).then((value) {
+                                  ContentModel contentModel =
+                                      value as ContentModel;
+
+                                  // 수정필요
+                                  setContent(
+                                      mode: 1, contentModel: contentModel);
+                                });
+                              },
+                              child: Image.asset(
+                                'assets/icons/edit_pencil.png',
+                                width: 16.w,
+                                height: 16.w,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                            '${dayContentModel.currentCount}/${widget.dayContentModel.maxCount}',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: Colors.white,
+                            ))
+                      ],
+                    ),
+                    if (widget.dayContentModel.maxRestGauge != 0)
+                      RestGaugeBox(
+                          gauge: dayContentModel.currentRestGauge! / 20)
+                  ],
+                ),
               ),
             ),
-          ),
-          Builder(builder: (context) {
-            switch (widget.mode) {
-              case 0:
-                return ContentCompleteButton(
-                  contentType: 0,
-                  characterName: widget.characterName,
-                  dayContentModel: widget.dayContentModel,
-                  onTap: () {
-                    setContent(mode: 0);
-                  },
-                );
-              case 1:
-                return GestureDetector(
-                  onTap: () {
-                    // setState(() {
-                    //   isVisible = false;
-                    // });
-                    // context.read<HomeProvider>().temporaryDeleteCharacter(widget.index);
-                  },
-                  child: Image.asset(
-                    'assets/icons/remove_button.png',
-                    width: 32.w,
-                    height: 32.w,
-                  ),
-                );
-              default:
-                return SizedBox();
-            }
-          }),
-        ],
+            Builder(builder: (context) {
+              switch (widget.mode) {
+                case 0:
+                  return ContentCompleteButton(
+                    contentType: 0,
+                    characterName: widget.characterName,
+                    dayContentModel: widget.dayContentModel,
+                    onTap: () {
+                      setContent(mode: 0);
+                    },
+                  );
+                case 1:
+                  return GestureDetector(
+                    onTap: () {
+                      context
+                          .read<CharacterProvider>()
+                          .temporaryDeleteContent(widget.index);
+
+                      // onTap: () {
+                      //     setState(() {
+                      //       isVisible = false;
+                      //     });
+                      //     context
+                      //         .read<HomeProvider>()
+                      //         .temporaryDeleteCharacter(widget.index);
+                      //   },
+                    },
+                    child: Container(
+                      width: 70.w,
+                      height: 50.h,
+                      alignment: Alignment.center,
+                      child: Image.asset(
+                        'assets/icons/remove_button.png',
+                        width: 32.w,
+                        height: 32.w,
+                      ),
+                    ),
+                  );
+                default:
+                  return SizedBox();
+              }
+            }),
+          ],
+        ),
       ),
     );
   }

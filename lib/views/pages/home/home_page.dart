@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_template/model/character/character_card_model.dart';
 import 'package:flutter_template/providers/home/home_provider.dart';
 import 'package:flutter_template/resources/constants/theme.dart';
+import 'package:flutter_template/views/widgets/common/confirm_appbar.dart';
 import 'package:flutter_template/views/widgets/home/character_card.dart';
 import 'package:flutter_template/views/widgets/common/edit_bottom_sheet/edit_button.dart';
 import 'package:flutter_template/views/widgets/home/home_appbar.dart';
@@ -48,52 +49,19 @@ class _HomePageState extends State<HomePage>
                               tabNames: context.read<HomeProvider>().tabNames),
                         ],
                       )
-                    : Container(
-                        height: 56.h,
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                context.read<HomeProvider>().changeMode(0);
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 5.h),
-                                child: Text(
-                                  '취소',
-                                  style: TextStyle(
-                                    color: const Color(0xffF15A5A),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16.sp,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                value.item3 == 1
-                                    ? context
-                                        .read<HomeProvider>()
-                                        .changeCharacterIndex(context)
-                                    : context
-                                        .read<HomeProvider>()
-                                        .deleteCharacter(context);
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 5.h),
-                                child: Text(
-                                  '완료',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16.sp,
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
+                    : ConfirmAppBar(
+                        cancleOntap: () {
+                          context.read<HomeProvider>().changeMode(0);
+                        },
+                        confirmOntap: () {
+                          value.item3 == 1
+                              ? context
+                                  .read<HomeProvider>()
+                                  .changeCharacterIndex(context)
+                              : context
+                                  .read<HomeProvider>()
+                                  .deleteCharacter(context);
+                        },
                       ),
                 Expanded(
                   child: Padding(
@@ -102,8 +70,6 @@ class _HomePageState extends State<HomePage>
                       physics: const NeverScrollableScrollPhysics(),
                       controller: context.read<HomeProvider>().tabController,
                       children: [
-                        //if (value.item1.isEmpty) return const SizedBox();
-
                         value.item3 == 0
                             ? SingleChildScrollView(
                                 child: Column(children: [
@@ -113,8 +79,6 @@ class _HomePageState extends State<HomePage>
                                       value.item1.length,
                                       (index) => CharacterCard(
                                         characterCardModel: value.item1[index],
-                                        // basicContents:
-                                        //     value.item1[index].basicContents,
                                         mode: value.item3,
                                         index: index,
                                       ),
@@ -151,9 +115,6 @@ class _HomePageState extends State<HomePage>
                                                   child: CharacterCard(
                                                     characterCardModel:
                                                         value.item2[index],
-                                                    // basicContents: value
-                                                    //     .item2[index]
-                                                    //     .basicContents,
                                                     mode: value.item3,
                                                     index: index,
                                                   ),
@@ -185,18 +146,17 @@ class _HomePageState extends State<HomePage>
                                       SizedBox(height: 24.h),
                                       ...List.generate(
                                         value.item2.length,
-                                        (index) => CharacterCard(
-                                          characterCardModel:
-                                              value.item2[index],
-                                          // basicContents:
-                                          //     value.item2[index].basicContents,
-                                          mode: value.item3,
-                                          index: index,
-                                        ),
+                                        (index) {
+                                          return CharacterCard(
+                                            characterCardModel:
+                                                value.item2[index],
+                                            mode: value.item3,
+                                            index: index,
+                                          );
+                                        },
                                       ),
                                     ]),
                                   ),
-
                         const SizedBox(
                           child: Center(
                             child: Text('원정대'),

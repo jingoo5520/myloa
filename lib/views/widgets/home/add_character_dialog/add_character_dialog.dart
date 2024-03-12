@@ -90,9 +90,10 @@ class _AddCharacterDialogState extends State<AddCharacterDialog> {
                   SizedBox(height: 14.h),
                   CustomDialogButton(
                     text: '추가하기',
-                    textColor: validation ? Color(0xffFCFBFC) : hintColor,
+                    textColor: validation ? const Color(0xffFCFBFC) : hintColor,
                     backgroundColor: Colors.white.withOpacity(0.01),
-                    borderColor: validation ? Color(0xffFCFBFC) : hintColor,
+                    borderColor:
+                        validation ? const Color(0xffFCFBFC) : hintColor,
                     ontap: () async {
                       String? message;
                       validation

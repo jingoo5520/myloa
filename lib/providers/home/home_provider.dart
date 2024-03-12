@@ -133,6 +133,7 @@ class HomeProvider extends ChangeNotifier {
     showModalBottomSheet(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.w)),
+        //모서리 둥글게
         clipBehavior: Clip.antiAliasWithSaveLayer,
         context: context,
         builder: (context) => ChangeNotifierProvider.value(
@@ -308,7 +309,6 @@ class HomeProvider extends ChangeNotifier {
   //캐릭터 임시 삭제
   temporaryDeleteCharacter(int index) {
     temporaryDeleteState[index] = true;
-    print(temporaryDeleteState);
   }
 
   //캐릭터 삭제 완료
