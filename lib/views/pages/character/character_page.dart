@@ -67,7 +67,9 @@ class _CharacterPageState extends State<CharacterPage>
                             : ConfirmAppBar(cancleOntap: () {
                                 context.read<CharacterProvider>().changeMode(0);
                               }, confirmOntap: () {
-                                //삭제 완료
+                                context
+                                    .read<CharacterProvider>()
+                                    .deleteContent(context);
                               }),
                       ],
                     )

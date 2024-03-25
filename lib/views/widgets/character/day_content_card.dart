@@ -165,9 +165,11 @@ class _DayContentCardState extends State<DayContentCard> {
                 case 1:
                   return GestureDetector(
                     onTap: () {
-                      context
-                          .read<CharacterProvider>()
-                          .temporaryDeleteContent(widget.index);
+                      widget.dayContentModel.priority > 2
+                          ? context
+                              .read<CharacterProvider>()
+                              .temporaryDeleteContent(widget.index)
+                          : null;
 
                       // onTap: () {
                       //     setState(() {
@@ -182,15 +184,17 @@ class _DayContentCardState extends State<DayContentCard> {
                       width: 70.w,
                       height: 50.h,
                       alignment: Alignment.center,
-                      child: Image.asset(
-                        'assets/icons/remove_button.png',
-                        width: 32.w,
-                        height: 32.w,
-                      ),
+                      child: widget.dayContentModel.priority > 2
+                          ? Image.asset(
+                              'assets/icons/remove_button.png',
+                              width: 32.w,
+                              height: 32.w,
+                            )
+                          : const SizedBox(),
                     ),
                   );
                 default:
-                  return SizedBox();
+                  return const SizedBox();
               }
             }),
           ],

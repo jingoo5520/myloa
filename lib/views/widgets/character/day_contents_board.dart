@@ -22,35 +22,39 @@ class DayContentsBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Selector<CharacterProvider, List<bool>>(
       selector: (p0, p1) => p1.temporaryDeleteState,
-      builder: (context, value, child) => Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: SingleChildScrollView(
-            child: Column(children: [
-          SizedBox(height: 24.h),
-          Column(
-            children: List.generate(dayContentList.length, (index) {
-              return Container(
-                  margin: EdgeInsets.only(
-                      bottom: index != dayContentList.length - 1 ? 16.h : 0),
-                  child: DayContentCard(
-                      isVisible: value.isEmpty ? true : !value[index],
-                      index: index,
-                      mode: mode,
-                      characterName: characterName,
-                      dayContentModel: dayContentList[index]));
-            }),
-          ),
-          mode == 0
-              ? EditButton(
-                  margin: 16.h,
-                  onTap: () {
-                    context
-                        .read<CharacterProvider>()
-                        .showEditDayContentsBottomSheet(context);
-                  })
-              : const SizedBox(),
-        ])),
-      ),
+      builder: (context, value, child) {
+        print(value);
+        print(dayContentList.length);
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: SingleChildScrollView(
+              child: Column(children: [
+            SizedBox(height: 24.h),
+            Column(
+              children: List.generate(dayContentList.length, (index) {
+                return Container(
+                    margin: EdgeInsets.only(
+                        bottom: index != dayContentList.length - 1 ? 16.h : 0),
+                    child: DayContentCard(
+                        isVisible: value.isEmpty ? true : !value[index],
+                        index: index,
+                        mode: mode,
+                        characterName: characterName,
+                        dayContentModel: dayContentList[index]));
+              }),
+            ),
+            mode == 0
+                ? EditButton(
+                    margin: 16.h,
+                    onTap: () {
+                      context
+                          .read<CharacterProvider>()
+                          .showEditDayContentsBottomSheet(context);
+                    })
+                : const SizedBox(),
+          ])),
+        );
+      },
     );
   }
 }

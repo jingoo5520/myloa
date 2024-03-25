@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class ContentModel {
   final String icon;
   final String contentName;

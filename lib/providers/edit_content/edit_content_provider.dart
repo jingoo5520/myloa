@@ -81,8 +81,5 @@ class EditContentProvider extends ChangeNotifier {
     }
 
     Navigator.of(context).pop(dayContentModel);
-    context.read<CommonProvider>().offLoad();
   }
-
-  //일일 컨텐츠 삭제
 }

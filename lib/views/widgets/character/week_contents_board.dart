@@ -12,41 +12,42 @@ class WeekContentsBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: context
-            .read<CharacterProvider>()
-            .getCharacterWeekContents(context, characterName),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('에러 발생'));
-          }
+    return SizedBox();
+    // StreamBuilder(
+    //     stream: context
+    //         .read<CharacterProvider>()
+    //         .getCharacterWeekContents(context, characterName),
+    //     builder: (context, snapshot) {
+    //       if (snapshot.hasError) {
+    //         return Center(child: Text('에러 발생'));
+    //       }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return SizedBox();
-          }
+    //       if (snapshot.connectionState == ConnectionState.waiting) {
+    //         return SizedBox();
+    //       }
 
-          if (!snapshot.hasData) {
-            return Center(child: Text('데이터 없음'));
-          }
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: SingleChildScrollView(
-              child: Column(
-                children: List.generate(snapshot.data!.docs.length, (index) {
-                  final data = snapshot.data!.docs;
+    //       if (!snapshot.hasData) {
+    //         return Center(child: Text('데이터 없음'));
+    //       }
+    //       return Padding(
+    //         padding: EdgeInsets.symmetric(horizontal: 10.w),
+    //         child: SingleChildScrollView(
+    //           child: Column(
+    //             children: List.generate(snapshot.data!.docs.length, (index) {
+    //               final data = snapshot.data!.docs;
 
-                  return WeekContentCard(
-                      characterName: characterName,
-                      weekContentModel: WeekContentModel(
-                          iconData: Icons.abc,
-                          contentName: data[index]['contentName'],
-                          maxStage: data[index]['maxStage'],
-                          clearedStage: data[index]['clearedStage'],
-                          priority: data[index]['priority']));
-                }),
-              ),
-            ),
-          );
-        });
+    //               return WeekContentCard(
+    //                   characterName: characterName,
+    //                   weekContentModel: WeekContentModel(
+    //                       iconData: Icons.abc,
+    //                       contentName: data[index]['contentName'],
+    //                       maxStage: data[index]['maxStage'],
+    //                       clearedStage: data[index]['clearedStage'],
+    //                       priority: data[index]['priority']));
+    //             }),
+    //           ),
+    //         ),
+    //       );
+    //     });
   }
 }
