@@ -3,9 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_template/model/content/common_day_content_model.dart';
 import 'package:flutter_template/model/content/content_model.dart';
 import 'package:flutter_template/model/content/week_content_model.dart';
-import 'package:flutter_template/providers/character/character_provider.dart';
-import 'package:flutter_template/providers/common_contents/common_contents_provider.dart';
-import 'package:provider/provider.dart';
 
 class ContentCompleteButton extends StatelessWidget {
   final int contentType;
@@ -28,27 +25,28 @@ class ContentCompleteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
-          switch (contentType) {
-            //캐릭터 일일 컨텐츠
-            case 0:
-              onTap();
-            // context.read<CharacterProvider>().completeDayContent(
-            //     context: context,
-            //     dayContentModel: dayContentModel!,
-            //     characterName: characterName);
-            //캐릭터 주간 컨텐츠
-            case 1:
-            // context.read<CharacterProvider>().completeWeekContent(
-            //     context: context,
-            //     weekContentModel: weekContentModel!,
-            //     characterName: characterName);
-            //공통 일일 컨텐츠
-            case 2:
-              context.read<CommonContentsProvider>().completeCommonDayContent(
-                    context,
-                    commonDayContentModel: commonDayContentModel!,
-                  );
-          }
+          onTap();
+          // switch (contentType) {
+          //   //캐릭터 일일 컨텐츠
+          //   case 0:
+          //     onTap();
+          //   // context.read<CharacterProvider>().completeDayContent(
+          //   //     context: context,
+          //   //     dayContentModel: dayContentModel!,
+          //   //     characterName: characterName);
+          //   //캐릭터 주간 컨텐츠
+          //   case 1:
+          //   // context.read<CharacterProvider>().completeWeekContent(
+          //   //     context: context,
+          //   //     weekContentModel: weekContentModel!,
+          //   //     characterName: characterName);
+          //   //공통 일일 컨텐츠
+          //   case 2:
+          //   // context.read<CommonContentsProvider>().completeCommonDayContent(
+          //   //       context,
+          //   //       commonDayContentModel: commonDayContentModel!,
+          //   //     );
+          // }
         },
         child: SizedBox(
           width: 70.w,

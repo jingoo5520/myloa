@@ -60,12 +60,15 @@ class _DayContentCardState extends State<DayContentCard> {
         currentRestGauge: restGauge,
       );
 
-      context.read<CharacterProvider>().updateContents(dayContentModel);
+      context
+          .read<CharacterProvider>()
+          .updateContents(contentModel: dayContentModel, type: 0);
     });
 
-    await context.read<CharacterProvider>().updateDayContentsDB(
+    await context.read<CharacterProvider>().updateContentsDB(
           context,
-          dayContentModel: dayContentModel,
+          type: 0,
+          contentModel: dayContentModel,
           characterName: widget.characterName,
         );
   }
@@ -94,7 +97,7 @@ class _DayContentCardState extends State<DayContentCard> {
                 )),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                padding: EdgeInsets.only(left: 20.w, right: 8.w),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -120,12 +123,14 @@ class _DayContentCardState extends State<DayContentCard> {
                                       'mode': 1,
                                       'contentModel': dayContentModel
                                     }).then((value) {
-                                  ContentModel contentModel =
-                                      value as ContentModel;
+                                  if (value != null) {
+                                    ContentModel contentModel =
+                                        value as ContentModel;
 
-                                  // 수정필요
-                                  setContent(
-                                      mode: 1, contentModel: contentModel);
+                                    // 수정필요
+                                    setContent(
+                                        mode: 1, contentModel: contentModel);
+                                  }
                                 });
                               },
                               child: Image.asset(
@@ -136,12 +141,19 @@ class _DayContentCardState extends State<DayContentCard> {
                             ),
                           ],
                         ),
-                        Text(
-                            '${dayContentModel.currentCount}/${widget.dayContentModel.maxCount}',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              color: Colors.white,
-                            ))
+                        Container(
+                          // width: 60.w,
+                          // height: 24.h,
+                          // alignment: Alignment.center,
+                          // color: Colors.red,
+                          child: Text(
+                              '${dayContentModel.currentCount}/${widget.dayContentModel.maxCount}',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                color: const Color(0xffC1C1C1),
+                                fontWeight: FontWeight.w500,
+                              )),
+                        )
                       ],
                     ),
                     if (widget.dayContentModel.maxRestGauge != 0)
@@ -170,15 +182,6 @@ class _DayContentCardState extends State<DayContentCard> {
                               .read<CharacterProvider>()
                               .temporaryDeleteContent(widget.index)
                           : null;
-
-                      // onTap: () {
-                      //     setState(() {
-                      //       isVisible = false;
-                      //     });
-                      //     context
-                      //         .read<HomeProvider>()
-                      //         .temporaryDeleteCharacter(widget.index);
-                      //   },
                     },
                     child: Container(
                       width: 70.w,

@@ -44,9 +44,11 @@ class _HomePageState extends State<HomePage>
                           const HomeAppBar(),
                           SizedBox(height: 20.h),
                           CustomTabBar(
-                              tabController:
-                                  context.read<HomeProvider>().tabController,
-                              tabNames: context.read<HomeProvider>().tabNames),
+                            tabController:
+                                context.read<HomeProvider>().tabController,
+                            tabNames: context.read<HomeProvider>().tabNames,
+                            mode: 0,
+                          ),
                         ],
                       )
                     : ConfirmAppBar(

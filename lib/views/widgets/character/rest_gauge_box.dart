@@ -19,7 +19,7 @@ class RestGaugeBox extends StatelessWidget {
         }),
         if (gauge % 1 != 0)
           Container(
-            width: 28.w,
+            width: 30.w,
             height: 8.h,
             child: Row(
               children: [

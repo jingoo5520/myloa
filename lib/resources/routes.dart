@@ -64,8 +64,6 @@ final Map<String, Widget Function(BuildContext context)> appRoutes = {
         lazy: false,
         create: (_) => EditContentProvider(
               context,
-              type: arguments['type'],
-              mode: arguments['mode'],
             ),
         child: EditContentPage(
           type: arguments['type'],

@@ -41,8 +41,10 @@ class _CharacterPageState extends State<CharacterPage>
       },
       child: Scaffold(
         backgroundColor: backgroundColor,
-        body: Selector<CharacterProvider, Tuple2<List<ContentModel>?, int>>(
-          selector: (p0, p1) => Tuple2(p1.dayContentList, p1.mode),
+        body: Selector<CharacterProvider,
+            Tuple3<List<ContentModel>?, List<ContentModel>?, int>>(
+          selector: (p0, p1) =>
+              Tuple3(p1.dayContentList, p1.weekContentList, p1.mode),
           builder: (context, value, child) {
             return Column(
               children: [
@@ -54,7 +56,7 @@ class _CharacterPageState extends State<CharacterPage>
                     Column(
                       children: [
                         SizedBox(height: MediaQuery.of(context).padding.top),
-                        value.item2 == 0
+                        value.item3 == 0
                             ? CustomAppBar(
                                 title: '캐릭터',
                                 leadingIcon: 'assets/icons/arrow_left.png',
@@ -65,17 +67,23 @@ class _CharacterPageState extends State<CharacterPage>
                                 },
                               )
                             : ConfirmAppBar(cancleOntap: () {
-                                context.read<CharacterProvider>().changeMode(0);
-                              }, confirmOntap: () {
                                 context
                                     .read<CharacterProvider>()
-                                    .deleteContent(context);
+                                    .changeMode(type: 0, mode: 0);
+                              }, confirmOntap: () {
+                                context.read<CharacterProvider>().deleteContent(
+                                    context,
+                                    type: context
+                                        .read<CharacterProvider>()
+                                        .tabController
+                                        .index);
                               }),
                       ],
                     )
                   ],
                 ),
                 CustomTabBar(
+                    mode: value.item3,
                     tabController:
                         context.read<CharacterProvider>().tabController,
                     tabNames: context.read<CharacterProvider>().tabNames),
@@ -86,14 +94,17 @@ class _CharacterPageState extends State<CharacterPage>
                           context.read<CharacterProvider>().tabController,
                       children: [
                         DayContentsBoard(
-                            mode: value.item2,
+                            mode: value.item3,
                             characterName: widget.characterCardModel
                                 .characterModel.characterName,
                             dayContentList: value.item1 ??
                                 widget.characterCardModel.dayContentList),
                         WeekContentsBoard(
+                          mode: value.item3,
                           characterName: widget
                               .characterCardModel.characterModel.characterName,
+                          weekContentList: value.item2 ??
+                              widget.characterCardModel.weekContentList,
                         ),
                       ]),
                 ),

@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_template/model/character/character_card_model.dart';
 import 'package:flutter_template/model/content/content_model.dart';
-import 'package:flutter_template/model/content/week_content_model.dart';
 import 'package:flutter_template/providers/common/common_provider.dart';
 import 'package:flutter_template/resources/routes.dart';
-import 'package:flutter_template/views/widgets/character/edit_week_content_dialog.dart';
 import 'package:flutter_template/views/widgets/common/edit_bottom_sheet/bottom_sheet_item.dart';
 import 'package:flutter_template/views/widgets/common/edit_bottom_sheet/edit_bottom_sheet.dart';
 import 'package:provider/provider.dart';
@@ -57,8 +55,12 @@ class CharacterProvider extends ChangeNotifier {
     await context
         .read<CommonProvider>()
         .selectCharacterDB(characterCardModel.characterModel.characterName);
-    getCharacterDayContents(
-        context, characterCardModel.characterModel.characterName);
+    getCharacterContents(context,
+        characterName: characterCardModel.characterModel.characterName,
+        type: 0);
+    getCharacterContents(context,
+        characterName: characterCardModel.characterModel.characterName,
+        type: 1);
   }
 
   //일일, 주간 탭 선택
@@ -70,107 +72,158 @@ class CharacterProvider extends ChangeNotifier {
   }
 
   //모드 변경
-  changeMode(int mode) {
+  changeMode({required int type, required int mode}) {
     this.mode = mode;
-    List<bool> temp;
+    List<bool> tempList;
 
     if (mode != 0) {
-      temp = List.filled(dayContentList!.length, false);
-      temporaryDeleteState = temp;
+      tempList = List.filled(
+          type == 0 ? dayContentList!.length : weekContentList!.length, false);
+      temporaryDeleteState = tempList;
     } else {
-      temp = [];
-      temporaryDeleteState = temp;
+      tempList = [];
+      temporaryDeleteState = tempList;
     }
 
     notifyListeners();
   }
 
-  //캐릭터 일일 컨텐츠 최초 불러오기
-  getCharacterDayContents(BuildContext context, String characterName) async {
+  //캐릭터 컨텐츠 불러오기
+  getCharacterContents(
+    BuildContext context, {
+    required String characterName,
+    required int type,
+  }) async {
     List<ContentModel> tempList = [];
 
     final characterDB = context.read<CommonProvider>().characterDB;
 
-    final dayContentsDB =
-        await characterDB.collection('dayContents').orderBy('priority').get();
+    late QuerySnapshot<Map<String, dynamic>> contentsDB;
 
-    for (var dayContent in dayContentsDB.docs) {
+    if (type == 0) {
+      contentsDB =
+          await characterDB.collection('dayContents').orderBy('priority').get();
+    } else if (type == 1) {
+      contentsDB = await characterDB
+          .collection('weekContents')
+          .orderBy('priority')
+          .get();
+    } else {}
+
+    for (var content in contentsDB.docs) {
       tempList.add(
         ContentModel(
-          icon: dayContent.data()['icon'],
-          contentName: dayContent.data()['contentName'],
-          maxCount: dayContent.data()['maxCount'],
-          currentCount: dayContent.data()['currentCount'],
-          maxRestGauge: dayContent.data()['maxRestGauge'],
-          currentRestGauge: dayContent.data()['currentRestGauge'],
-          priority: dayContent.data()['priority'],
+          icon: content.data()['icon'],
+          contentName: content.data()['contentName'],
+          maxCount: content.data()['maxCount'],
+          currentCount: content.data()['currentCount'],
+          maxRestGauge: content.data()['maxRestGauge'],
+          currentRestGauge: content.data()['currentRestGauge'],
+          maxStage: content.data()['maxStage'],
+          clearedStage: content.data()['clearedStage'],
+          priority: content.data()['priority'],
         ),
       );
     }
 
     await Future.delayed(Duration.zero);
-    dayContentList = tempList;
+
+    if (type == 0) {
+      dayContentList = tempList;
+    } else if (type == 1) {
+      weekContentList = tempList;
+    } else {}
+
     notifyListeners();
   }
 
   //컨텐츠 화면 업데이트
-  updateContents(ContentModel model) async {
+  updateContents({
+    required ContentModel contentModel,
+    required int type,
+  }) async {
     List<ContentModel> tempList;
 
-    tempList = dayContentList!.map((dayContent) {
-      if (dayContent.contentName == model.contentName) {
-        // 해당 모델의 이름이 일치하면 copyWith를 사용하여 정보 변경
-        return dayContent.copyWith(
-          currentCount: model.currentCount,
-          currentRestGauge: model.currentRestGauge,
-        );
-      } else {
-        return dayContent;
-      }
-    }).toList();
+    if (type == 0) {
+      tempList = dayContentList!.map((dayContent) {
+        if (dayContent.contentName == contentModel.contentName) {
+          // 해당 모델의 이름이 일치하면 copyWith를 사용하여 정보 변경
+          return dayContent.copyWith(
+            currentCount: contentModel.currentCount,
+            currentRestGauge: contentModel.currentRestGauge,
+          );
+        } else {
+          return dayContent;
+        }
+      }).toList();
 
-    dayContentList = tempList;
+      dayContentList = tempList;
+    } else if (type == 1) {
+      tempList = weekContentList!.map((weekContent) {
+        if (weekContent.contentName == contentModel.contentName) {
+          // 해당 모델의 이름이 일치하면 copyWith를 사용하여 정보 변경
+          return weekContent.copyWith(
+            currentCount: contentModel.currentCount,
+            clearedStage: contentModel.clearedStage,
+          );
+        } else {
+          return weekContent;
+        }
+      }).toList();
+
+      weekContentList = tempList;
+    } else {}
+
     notifyListeners();
   }
 
-  //일일 컨텐츠 DB 업데이트
-  updateDayContentsDB(
+  //컨텐츠 DB 업데이트
+  updateContentsDB(
     BuildContext context, {
-    required ContentModel dayContentModel,
+    required int type,
+    required ContentModel contentModel,
     required characterName,
   }) async {
     final characterDB = context.read<CommonProvider>().characterDB;
 
-    final content = (await characterDB
-            .collection('dayContents')
-            .where('contentName', isEqualTo: dayContentModel.contentName)
+    DocumentReference<Map<String, dynamic>> content = (await characterDB
+            .collection(type == 0 ? 'dayContents' : 'weekContents')
+            .where('contentName', isEqualTo: contentModel.contentName)
             .get())
         .docs
         .first
         .reference;
 
-    if (timers[dayContentModel.contentName] != null) {
-      timers[dayContentModel.contentName]!.cancel();
+    if (timers[contentModel.contentName] != null) {
+      timers[contentModel.contentName]!.cancel();
     }
 
     final timer = Timer(const Duration(milliseconds: 500), () async {
-      await content.update({
-        'currentCount': dayContentModel.currentCount,
-        'currentRestGauge': dayContentModel.currentRestGauge,
-      });
+      if (type == 0) {
+        await content.update({
+          'currentCount': contentModel.currentCount,
+          'currentRestGauge': contentModel.currentRestGauge,
+        });
+      } else if (type == 1) {
+        await content.update({
+          'currentCount': contentModel.currentCount,
+          'clearedStage': contentModel.clearedStage,
+        });
+      } else {}
 
-      timers.remove(dayContentModel.contentName);
+      timers.remove(contentModel.contentName);
     });
 
-    timers[dayContentModel.contentName] = timer;
+    timers[contentModel.contentName] = timer;
   }
 
-  //캐릭터 일일 컨텐츠 편집 다이얼로그
-  showEditDayContentsBottomSheet(
-    BuildContext context,
-  ) async {
+  //캐릭터 컨텐츠 편집 다이얼로그
+  showEditContentsBottomSheet(
+    BuildContext context, {
+    required int type,
+  }) async {
     late int mode;
-    late int type;
+
     bool? result = await showModalBottomSheet(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.w)),
@@ -186,7 +239,7 @@ class CharacterProvider extends ChangeNotifier {
                     color: const Color(0xffd7d7d7),
                     ontap: () {
                       mode = 0;
-                      type = 0;
+                      type = type;
                       Navigator.of(context).pop(true);
                     },
                   ),
@@ -195,7 +248,7 @@ class CharacterProvider extends ChangeNotifier {
                     color: const Color(0xffff6060),
                     ontap: () {
                       mode = 1;
-                      type = 0;
+                      type = type;
                       Navigator.of(context).pop(true);
                     },
                   ),
@@ -206,7 +259,7 @@ class CharacterProvider extends ChangeNotifier {
     if (result == true) {
       //삭제 모드
       if (mode == 1) {
-        changeMode(1);
+        changeMode(type: type, mode: mode);
       }
       //추가, 수정 모드
       else {
@@ -215,8 +268,9 @@ class CharacterProvider extends ChangeNotifier {
           'type': type,
         }).then((value) async {
           if (value != null) {
-            await getCharacterDayContents(
-                context, characterCardModel.characterModel.characterName);
+            await getCharacterContents(context,
+                characterName: characterCardModel.characterModel.characterName,
+                type: type);
           }
           context.read<CommonProvider>().offLoad();
         });
@@ -236,118 +290,26 @@ class CharacterProvider extends ChangeNotifier {
   }
 
   //컨텐츠 삭제 완료
-  deleteContent(BuildContext context) async {
+  deleteContent(BuildContext context, {required int type}) async {
     context.read<CommonProvider>().onLoad();
 
     final characterDB = context.read<CommonProvider>().characterDB;
 
-    final dayContentsDB =
-        await characterDB.collection('dayContents').orderBy('priority').get();
+    final contentsDB = await characterDB
+        .collection(type == 0 ? 'dayContents' : 'weekContents')
+        .orderBy('priority')
+        .get();
 
-    for (int i = 0; i < dayContentsDB.docs.length; i++) {
+    for (int i = 0; i < contentsDB.docs.length; i++) {
       if (temporaryDeleteState[i] == true) {
-        await dayContentsDB.docs[i].reference.delete();
+        await contentsDB.docs[i].reference.delete();
       }
     }
 
-    await getCharacterDayContents(
-        context, characterCardModel.characterModel.characterName);
-    changeMode(0);
+    await getCharacterContents(context,
+        characterName: characterCardModel.characterModel.characterName,
+        type: type);
+    changeMode(type: type, mode: 0);
     context.read<CommonProvider>().offLoad();
   }
-
-  // //캐릭터 주간 컨텐츠 불러오기
-  // Stream<QuerySnapshot> getCharacterWeekContents(
-  //     BuildContext context, String characterName) async* {
-  //   final characterDB = await context.read<CommonProvider>().characterDB;
-
-  //   Stream<QuerySnapshot> stream =
-  //       characterDB.collection('weekContents').orderBy('priority').snapshots();
-
-  //   await for (QuerySnapshot snapshot in stream) {
-  //     yield snapshot;
-  //   }
-  // }
-
-  // //주간 컨텐츠 추가, 수정 다이얼로그
-  // showEditWeekContentDialog(BuildContext context,
-  //     {required String characterName,
-  //     required int mode,
-  //     WeekContentModel? weekContentModel}) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => ChangeNotifierProvider.value(
-  //       value: this,
-  //       child: Dialog(
-  //           child: EditWeekContentDialog(
-  //         characterName: characterName,
-  //         mode: mode,
-  //         weekContentModel: weekContentModel,
-  //       )),
-  //     ),
-  //   ).then((value) async {
-  //     if (value == null) {
-  //       return;
-  //     }
-
-  //     if (value['result'] == true) {
-  //       await editWeekContent(
-  //         context: context,
-  //         characterName: characterName,
-  //         mode: value['mode'],
-  //         weekContentModel: value['weekContentModel'],
-  //       );
-  //     }
-  //     clearedStageTextEditingController.clear();
-  //   });
-  // }
-
-  // //주간 컨텐츠 추가
-  // editWeekContent(
-  //     {required BuildContext context,
-  //     required String characterName,
-  //     required int mode,
-  //     required WeekContentModel weekContentModel}) async {
-  //   var data;
-
-  //   final userDB = context.read<CommonProvider>().userDB;
-
-  //   final userCharacterDB = (await userDB
-  //           .collection('characters')
-  //           .where('characterName', isEqualTo: characterName)
-  //           .get())
-  //       .docs
-  //       .first
-  //       .reference;
-
-  //   final weekContent = userCharacterDB
-  //       .collection('weekContents')
-  //       .where('contentName', isEqualTo: weekContentModel.contentName);
-
-  //   //주간 컨텐츠 생성
-  //   if (mode == 0) {
-  //     data = {
-  //       'contentName': weekContentModel.contentName,
-  //       'maxStage': weekContentModel.maxStage,
-  //       'clearedStage': int.parse(clearedStageTextEditingController.text),
-  //       'priority': weekContentModel.priority,
-  //     };
-
-  //     //이미 존재하는 컨텐츠라면
-  //     if ((await weekContent.get()).docs.isEmpty == true) {
-  //       await userCharacterDB.collection('weekContents').add(data);
-  //     } else {
-  //       debugPrint('중복된 컨텐츠');
-  //     }
-  //   } else {
-  //     //주간 컨텐츠 수정
-  //     final clearedStage = clearedStageTextEditingController.text.isEmpty
-  //         ? 0
-  //         : int.parse(clearedStageTextEditingController.text);
-
-  //     (await weekContent.get()).docs.first.reference.update({
-  //       'clearedStage': clearedStage,
-  //     });
-  //   }
-  // }
 }

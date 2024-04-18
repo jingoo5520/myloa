@@ -300,3 +300,55 @@
   //       .collection('weekContents')
   //       .get();
   // }
+
+  //캐릭터 컨텐츠 불러오기
+  // Future<List<dynamic>> getCharacterDayContents(
+  //     BuildContext context, String characterName) async {
+  //   print('getContents');
+  //   final characterDB = (await context
+  //           .read<CommonProvider>()
+  //           .userDB
+  //           .collection('characters')
+  //           .where('characterName', isEqualTo: characterName)
+  //           .get())
+  //       .docs
+  //       .first
+  //       .reference;
+
+  //   final dayContentsDB =
+  //       await characterDB.collection('dayContents').orderBy('priority').get();
+
+  //   final dayContentsList = (dayContentsDB.docs);
+  //   List<ContentModel> tempList = [];
+  //   List<ContentModel> tempList2 = [];
+
+  //   for (int i = 0; i < dayContentsList.length; i++) {
+  //     if (i < 3) {
+  //       tempList.add(
+  //         ContentModel(
+  //           icon: dayContentsList[i].data()['icon'],
+  //           contentName: dayContentsList[i].data()['contentName'],
+  //           maxCount: dayContentsList[i].data()['maxCount'],
+  //           currentCount: dayContentsList[i].data()['currentCount'],
+  //           maxRestGauge: dayContentsList[i].data()['maxRestGauge'],
+  //           currentRestGauge: dayContentsList[i].data()['currentRestGauge'],
+  //           priority: dayContentsList[i].data()['priority'],
+  //         ),
+  //       );
+  //     }
+
+  //     tempList2.add(
+  //       ContentModel(
+  //         icon: dayContentsList[i].data()['icon'],
+  //         contentName: dayContentsList[i].data()['contentName'],
+  //         maxCount: dayContentsList[i].data()['maxCount'],
+  //         currentCount: dayContentsList[i].data()['currentCount'],
+  //         maxRestGauge: dayContentsList[i].data()['maxRestGauge'],
+  //         currentRestGauge: dayContentsList[i].data()['currentRestGauge'],
+  //         priority: dayContentsList[i].data()['priority'],
+  //       ),
+  //     );
+  //   }
+
+  //   return [tempList, tempList2];
+  // }

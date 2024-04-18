@@ -112,6 +112,17 @@ class HomeProvider extends ChangeNotifier {
               'priority': dayContents[i].priority,
             });
           }
+          value.collection('weekContents').add({
+            'icon': weekContents[0].icon,
+            'contentName': weekContents[0].contentName,
+            'maxCount': weekContents[0].maxCount,
+            'currentCount': weekContents[0].maxCount,
+            'maxRestGauge': weekContents[0].maxRestGauge,
+            'currentRestGauge': weekContents[0].maxRestGauge,
+            'maxStage': weekContents[0].maxStage,
+            'clearedStage': weekContents[0].clearedStage,
+            'priority': weekContents[0].priority,
+          });
         });
 
         await getMyCharacters(context);
@@ -189,6 +200,11 @@ class HomeProvider extends ChangeNotifier {
           .orderBy('priority')
           .get();
 
+      final weekContentDB = await character.reference
+          .collection('weekContents')
+          .orderBy('priority')
+          .get();
+
       CharacterModel characterModel = CharacterModel(
           serverName: character.data()['serverName'],
           characterName: character.data()['characterName'],
@@ -222,6 +238,22 @@ class HomeProvider extends ChangeNotifier {
             maxRestGauge: dayContentsDB.docs[i]['maxRestGauge'],
             currentRestGauge: dayContentsDB.docs[i]['currentRestGauge'],
             priority: dayContentsDB.docs[i]['priority'],
+          ),
+        );
+      }
+
+      for (int i = 0; i < weekContentDB.docs.length; i++) {
+        tempWeekContentList.add(
+          ContentModel(
+            icon: weekContentDB.docs[i]['icon'],
+            contentName: weekContentDB.docs[i]['contentName'],
+            maxCount: weekContentDB.docs[i]['maxCount'],
+            currentCount: weekContentDB.docs[i]['currentCount'],
+            maxRestGauge: weekContentDB.docs[i]['maxRestGauge'],
+            currentRestGauge: weekContentDB.docs[i]['currentRestGauge'],
+            maxStage: weekContentDB.docs[i]['maxStage'],
+            clearedStage: weekContentDB.docs[i]['clearedStage'],
+            priority: weekContentDB.docs[i]['priority'],
           ),
         );
       }
@@ -334,57 +366,5 @@ class HomeProvider extends ChangeNotifier {
     await getMyCharacters(context);
     changeMode(0);
     context.read<CommonProvider>().offLoad();
-  }
-
-  //캐릭터 컨텐츠 불러오기
-  Future<List<dynamic>> getCharacterDayContents(
-      BuildContext context, String characterName) async {
-    print('getContents');
-    final characterDB = (await context
-            .read<CommonProvider>()
-            .userDB
-            .collection('characters')
-            .where('characterName', isEqualTo: characterName)
-            .get())
-        .docs
-        .first
-        .reference;
-
-    final dayContentsDB =
-        await characterDB.collection('dayContents').orderBy('priority').get();
-
-    final dayContentsList = (dayContentsDB.docs);
-    List<ContentModel> tempList = [];
-    List<ContentModel> tempList2 = [];
-
-    for (int i = 0; i < dayContentsList.length; i++) {
-      if (i < 3) {
-        tempList.add(
-          ContentModel(
-            icon: dayContentsList[i].data()['icon'],
-            contentName: dayContentsList[i].data()['contentName'],
-            maxCount: dayContentsList[i].data()['maxCount'],
-            currentCount: dayContentsList[i].data()['currentCount'],
-            maxRestGauge: dayContentsList[i].data()['maxRestGauge'],
-            currentRestGauge: dayContentsList[i].data()['currentRestGauge'],
-            priority: dayContentsList[i].data()['priority'],
-          ),
-        );
-      }
-
-      tempList2.add(
-        ContentModel(
-          icon: dayContentsList[i].data()['icon'],
-          contentName: dayContentsList[i].data()['contentName'],
-          maxCount: dayContentsList[i].data()['maxCount'],
-          currentCount: dayContentsList[i].data()['currentCount'],
-          maxRestGauge: dayContentsList[i].data()['maxRestGauge'],
-          currentRestGauge: dayContentsList[i].data()['currentRestGauge'],
-          priority: dayContentsList[i].data()['priority'],
-        ),
-      );
-    }
-
-    return [tempList, tempList2];
   }
 }

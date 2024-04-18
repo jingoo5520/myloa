@@ -28,6 +28,8 @@ class ContentModel {
     int? currentCount,
     int? maxRestGauge,
     int? currentRestGauge,
+    int? clearedStage,
+    int? maxStage,
     int? priority,
   }) {
     return ContentModel(
@@ -37,13 +39,15 @@ class ContentModel {
       currentCount: currentCount ?? this.currentCount,
       maxRestGauge: maxRestGauge ?? this.maxRestGauge,
       currentRestGauge: currentRestGauge ?? this.currentRestGauge,
+      clearedStage: clearedStage ?? this.clearedStage,
+      maxStage: maxStage ?? this.maxStage,
       priority: priority ?? this.priority,
     );
   }
 
   @override
   String toString() {
-    return 'countentName : $contentName, maxCount : $maxCount, currentCount : $currentCount, maxRestGauge : $maxRestGauge, currentRestGauge : $currentRestGauge';
+    return 'countentName : $contentName, maxCount : $maxCount, currentCount : $currentCount, maxRestGauge : $maxRestGauge, currentRestGauge : $currentRestGauge, maxStage : $maxStage, clearedStage : $clearedStage';
   }
 
   @override

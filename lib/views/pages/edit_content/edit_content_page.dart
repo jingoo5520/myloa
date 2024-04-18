@@ -2,13 +2,13 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_template/model/content/content_model.dart';
-import 'package:flutter_template/model/content/week_content_model.dart';
+import 'package:flutter_template/providers/common/common_provider.dart';
 import 'package:flutter_template/providers/edit_content/edit_content_provider.dart';
 import 'package:flutter_template/resources/constants/constants.dart';
 import 'package:flutter_template/resources/constants/theme.dart';
 import 'package:flutter_template/views/widgets/common/custom_appbar.dart';
 import 'package:flutter_template/views/widgets/common/custom_button.dart';
-import 'package:flutter_template/views/widgets/edit_content/day_content_items_board.dart';
+import 'package:flutter_template/views/widgets/edit_content/content_infos_board.dart';
 import 'package:provider/provider.dart';
 
 class EditContentPage extends StatefulWidget {
@@ -28,29 +28,22 @@ class EditContentPage extends StatefulWidget {
 }
 
 class _EditContentPageState extends State<EditContentPage> {
-  ContentModel? dayContentModel;
-  late WeekContentModel weekContentModel;
-  ContentModel selectedContent = dayContents[0];
+  late ContentModel selectedContent;
 
   @override
   void initState() {
     super.initState();
     //수정 모드
     if (widget.mode == 1) {
-      if (widget.type == 0) {
-        dayContentModel = widget.contentModel as ContentModel;
-      } else if (widget.type == 1) {
-        weekContentModel = widget.contentModel as WeekContentModel;
-      } else {}
+      selectedContent = widget.contentModel!;
     }
-
     //추가 모드
     else {
       if (widget.type == 0) {
-        dayContentModel = dayContents[0];
+        selectedContent = dayContents[0];
       } else if (widget.type == 1) {
-        //weekContentModel = widget.contentModel as WeekContentModel;
-      } else {}
+        selectedContent = weekContents[0];
+      }
     }
   }
 
@@ -82,11 +75,7 @@ class _EditContentPageState extends State<EditContentPage> {
                               SizedBox(height: 32.h),
                               widget.mode == 1
                                   ? Text(
-                                      widget.type == 0
-                                          ? dayContentModel!.contentName
-                                          : widget.type == 1
-                                              ? weekContentModel.contentName
-                                              : '',
+                                      widget.contentModel!.contentName,
                                       style: TextStyle(
                                           fontSize: 22.sp,
                                           fontWeight: FontWeight.w600,
@@ -100,15 +89,16 @@ class _EditContentPageState extends State<EditContentPage> {
                                           child: DropdownButton2(
                                             selectedItemBuilder: (context) =>
                                                 selectedContentList(
-                                                    dayContents),
+                                                    widget.type == 0
+                                                        ? dayContents
+                                                        : weekContents),
                                             value: selectedContent,
-                                            items: contentsList(dayContents),
+                                            items: contentsList(widget.type == 0
+                                                ? dayContents
+                                                : weekContents),
                                             onChanged: (value) {
                                               setState(() {
                                                 selectedContent = value!;
-                                                dayContentModel =
-                                                    selectedContent
-                                                        as ContentModel;
                                               });
                                             },
                                             buttonStyleData: ButtonStyleData(
@@ -118,12 +108,14 @@ class _EditContentPageState extends State<EditContentPage> {
                                             iconStyleData: const IconStyleData(
                                                 iconSize: 0),
                                             menuItemStyleData:
-                                                MenuItemStyleData(
+                                                const MenuItemStyleData(
                                               padding: EdgeInsets.symmetric(
                                                   vertical: 0),
                                             ),
                                             dropdownStyleData:
                                                 DropdownStyleData(
+                                                    //수정 필요
+                                                    maxHeight: 400.h,
                                                     padding:
                                                         EdgeInsets.symmetric(
                                                             vertical: 18.h,
@@ -140,11 +132,11 @@ class _EditContentPageState extends State<EditContentPage> {
                                       ],
                                     ),
                               SizedBox(height: 32.h),
-                              if (widget.type == 0)
-                                DayContentItemsBoard(
-                                  mode: widget.mode,
-                                  dayContentModel: dayContentModel,
-                                ),
+                              ContentInfosBoard(
+                                type: widget.type,
+                                mode: widget.mode,
+                                contentModel: selectedContent,
+                              ),
                             ],
                           ),
                           Column(
@@ -158,46 +150,26 @@ class _EditContentPageState extends State<EditContentPage> {
                                               : '수정하기',
                                           ontap: () async {
                                             if (value) {
-                                              ContentModel
-                                                  modifiedDayContentModel =
-                                                  dayContentModel!.copyWith(
-                                                      currentCount: int.parse(context
-                                                          .read<
-                                                              EditContentProvider>()
-                                                          .currentCountTextEditingController
-                                                          .text),
-                                                      currentRestGauge: context
-                                                                  .read<
-                                                                      EditContentProvider>()
-                                                                  .currentRestGaugeTextEditingController
-                                                                  .text !=
-                                                              ''
-                                                          ? int.parse(context
-                                                              .read<
-                                                                  EditContentProvider>()
-                                                              .currentRestGaugeTextEditingController
-                                                              .text)
-                                                          : 0);
-
                                               await context
                                                   .read<EditContentProvider>()
-                                                  .editDayContent(context,
+                                                  .editContent(context,
+                                                      type: widget.type,
                                                       mode: widget.mode,
-                                                      dayContentModel:
-                                                          modifiedDayContentModel);
+                                                      contentModel:
+                                                          selectedContent);
 
-                                              //결과
-                                              // Navigator.of(context)
-                                              //     .pop(modifiedDayContentModel);
+                                              context
+                                                  .read<CommonProvider>()
+                                                  .offLoad();
                                             }
                                           },
                                           textColor: value == true
-                                              ? Color(0xfffcfbfc)
-                                              : Color(0xff565656),
+                                              ? const Color(0xffFCFBFC)
+                                              : const Color(0xff565656),
                                           backgroundColor: backgroundColor,
                                           borderColor: value == true
-                                              ? Color(0xfffcfbfc)
-                                              : Color(0xff565656))),
+                                              ? const Color(0xffFCFBFC)
+                                              : const Color(0xff565656))),
                               SizedBox(height: 40.h)
                             ],
                           ),
@@ -226,7 +198,7 @@ List<DropdownMenuItem> contentsList(List contents) {
             decoration: BoxDecoration(
                 border: Border(
                     bottom: content != contents.last
-                        ? BorderSide(color: Color(0xff565656))
+                        ? const BorderSide(color: Color(0xff565656))
                         : BorderSide.none)),
             alignment: Alignment.centerLeft,
             width: double.infinity,

@@ -5,22 +5,16 @@ import 'package:flutter_template/providers/common/common_provider.dart';
 import 'package:provider/provider.dart';
 
 class EditContentProvider extends ChangeNotifier {
-  final int mode; //0: 추가, 1: 수정
-  final int type; //0: 일일 컨텐츠, 1: 주간 컨텐츠, 2:
-
   bool validation = true;
 
-  //일일 컨텐츠용
   TextEditingController currentCountTextEditingController =
       TextEditingController();
   TextEditingController currentRestGaugeTextEditingController =
       TextEditingController();
+  TextEditingController clearedStageTextEditingController =
+      TextEditingController();
 
-  EditContentProvider(
-    BuildContext context, {
-    required this.type,
-    required this.mode,
-  }) {
+  EditContentProvider(BuildContext context) {
     debugPrint('editContent');
   }
 
@@ -30,56 +24,129 @@ class EditContentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  //일일 컨텐츠 추가, 수정
-  editDayContent(
+  //컨텐츠 추가, 수정
+  editContent(
     BuildContext context, {
-    required int mode,
-    required ContentModel dayContentModel,
+    required int type, //0: 일일 컨텐츠, 1: 주간 컨텐츠
+    required int mode, //0: 추가, 1: 수정
+    required ContentModel contentModel,
   }) async {
     context.read<CommonProvider>().onLoad();
+
+    late ContentModel edittedContentModel;
+
     DocumentReference<Map<String, dynamic>> characterDB =
         context.read<CommonProvider>().characterDB;
 
-    final dayContentsDB = characterDB.collection('dayContents');
+    if (type == 0) {
+      final dayContentsDB = characterDB.collection('dayContents');
 
-    //추가
-    if (mode == 0) {
-      final data = {
-        'icon': dayContentModel.icon,
-        'contentName': dayContentModel.contentName,
-        'maxCount': dayContentModel.maxCount,
-        'currentCount': dayContentModel.currentCount,
-        'maxRestGauge': dayContentModel.maxRestGauge,
-        'currentRestGauge': dayContentModel.currentRestGauge,
-        'priority': dayContentModel.priority,
-      };
+      int currentCount = int.parse(currentCountTextEditingController.text);
+      int currentRestGauge = currentRestGaugeTextEditingController.text != ''
+          ? int.parse(currentRestGaugeTextEditingController.text)
+          : 0;
 
-      if ((await dayContentsDB
-              .where('contentName', isEqualTo: dayContentModel.contentName)
-              .get())
-          .docs
-          .isEmpty) {
-        await dayContentsDB.add(data);
-      } else {
-        //중복된 컨텐츠
-        print('이미 존재하는 컨텐츠입니다.');
+      //추가
+      if (mode == 0) {
+        final data = {
+          'icon': contentModel.icon,
+          'contentName': contentModel.contentName,
+          'maxCount': contentModel.maxCount,
+          'currentCount': currentCount,
+          'maxRestGauge': contentModel.maxRestGauge,
+          'currentRestGauge': currentRestGauge,
+          'priority': contentModel.priority,
+        };
+
+        if ((await dayContentsDB
+                .where('contentName', isEqualTo: contentModel.contentName)
+                .get())
+            .docs
+            .isEmpty) {
+          await dayContentsDB.add(data);
+        } else {
+          //중복된 컨텐츠
+          //토스트 메세지 추가 예정
+          print('이미 존재하는 컨텐츠입니다.');
+        }
       }
-    }
-    //수정
-    else {
-      final content = (await dayContentsDB
-              .where('contentName', isEqualTo: dayContentModel.contentName)
-              .get())
-          .docs
-          .first
-          .reference;
+      //수정
+      else {
+        final content = (await dayContentsDB
+                .where('contentName', isEqualTo: contentModel.contentName)
+                .get())
+            .docs
+            .first
+            .reference;
 
-      await content.update({
-        'currentCount': dayContentModel.currentCount,
-        'currentRestGauge': dayContentModel.currentRestGauge,
-      });
-    }
+        await content.update({
+          'currentCount': currentCount,
+          'currentRestGauge': currentRestGauge
+        });
+      }
 
-    Navigator.of(context).pop(dayContentModel);
+      edittedContentModel = contentModel.copyWith(
+        currentCount: currentCount,
+        currentRestGauge: currentRestGauge,
+      );
+    } else if (type == 1) {
+      final weekContentsDB = characterDB.collection('weekContents');
+
+      int currentCount = currentCountTextEditingController.text != ''
+          ? int.parse(currentCountTextEditingController.text)
+          : 0;
+      int clearedStage = clearedStageTextEditingController.text != ''
+          ? int.parse(clearedStageTextEditingController.text)
+          : 0;
+
+      //추가
+      if (mode == 0) {
+        final data = {
+          'icon': contentModel.icon,
+          'contentName': contentModel.contentName,
+          'maxCount': contentModel.maxCount,
+          'currentCount': currentCount,
+          'maxRestGauge': contentModel.maxRestGauge,
+          'currentRestGauge': contentModel.currentRestGauge,
+          'maxStage': contentModel.maxStage,
+          'clearedStage': clearedStage,
+          'priority': contentModel.priority,
+        };
+
+        if ((await weekContentsDB
+                .where('contentName', isEqualTo: contentModel.contentName)
+                .get())
+            .docs
+            .isEmpty) {
+          await weekContentsDB.add(data);
+        } else {
+          //중복된 컨텐츠
+          //토스트 메세지 추가 예정
+          print('이미 존재하는 컨텐츠입니다.');
+        }
+      }
+      //수정
+      else {
+        final content = (await weekContentsDB
+                .where('contentName', isEqualTo: contentModel.contentName)
+                .get())
+            .docs
+            .first
+            .reference;
+
+        await content.update({
+          'currentCount': currentCount,
+          'clearedStage': clearedStage,
+        });
+      }
+
+      print('업뎃중');
+      edittedContentModel = contentModel.copyWith(
+        currentCount: currentCount,
+        clearedStage: clearedStage,
+      );
+    } else {}
+
+    Navigator.of(context).pop(edittedContentModel);
   }
 }
